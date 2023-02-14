@@ -90,10 +90,7 @@
     const input = document.getElementById("input");
     const output = document.getElementById("output");
     const scoreBoard = document.getElementById("score-board");
-    let connectHost = location.hostname;
-    if (connectHost === "localhost"){
-        connectHost += ':8080'
-    }
+    let connectHost = location.hostname + ":" + location.port;
     const socket = new WebSocket(`ws://${connectHost}/connect`);
 
     socket.onopen = function () {
