@@ -105,7 +105,7 @@
         if(input.value === ""){
             return
         }
-        fetch("http://localhost:8080/send-message", {
+        fetch("/send-message", {
             method: "post",
             //make sure to serialize your JSON body
             body: JSON.stringify({
@@ -116,7 +116,7 @@
         input.value = ""
     }
     function registerBtnHit(){
-        fetch("http://localhost:8080/register-hit", {
+        fetch("/register-hit", {
             method: "post",
             body: JSON.stringify({
                 user: name.value,
@@ -125,7 +125,7 @@
     }
 
     setInterval(()=> {
-        fetch("http://localhost:8080/top-scorers").then(async (resp) => {
+        fetch("/top-scorers").then(async (resp) => {
             let scoreBoardContent = ""
             let scores = await resp.json()
             scores.elements.forEach((v) => {
