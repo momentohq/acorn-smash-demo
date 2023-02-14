@@ -90,7 +90,11 @@
     const input = document.getElementById("input");
     const output = document.getElementById("output");
     const scoreBoard = document.getElementById("score-board");
-    const socket = new WebSocket("ws:///connect");
+    let connectHost = location.hostname;
+    if (connectHost === "localhost"){
+        connectHost += ':8080'
+    }
+    const socket = new WebSocket(`ws://${connectHost}/connect`);
 
     socket.onopen = function () {
         output.innerHTML += "Status: Connected\n";
