@@ -90,7 +90,7 @@
     const input = document.getElementById("input");
     const output = document.getElementById("output");
     const scoreBoard = document.getElementById("score-board");
-    const socket = new WebSocket("/connect");
+    const socket = new WebSocket("ws:///connect");
 
     socket.onopen = function () {
         output.innerHTML += "Status: Connected\n";
