@@ -1,140 +1,41 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <style>
-        #messageBar {
-            position: absolute;
-            bottom: 30px;
-            left: 15px;
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-        #input {
-            height: 40px;
-            width: 300px
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        .flex-container {
-            display: flex;
-            height: 100%;
-            flex-wrap: wrap;
-            font-size: 18px;
-        }
-
-        .left-chat-side-bar {
-            background-color: #f1f1f1;
-            padding: 10px;
-            flex: 30%;
-        }
-
-        .main-game-screen-right {
-            background-color: white;
-            padding: 10px;
-            flex: 70%;
-        }
-        .board-screen-left {
-            background-color: white;
-            padding: 10px;
-            flex: 70%;
-            background-image: url("https://pbs.twimg.com/profile_images/1622968546321117185/n_qHM32R_400x400.jpg")
-        }
-        .board-screen-right {
-            background-color: lightskyblue;
-            padding: 10px;
-            flex: 30%;
-        }
-
-        #game-btn {
-            height: 200px;
-            width: 200px;
-            background: white;
-            border: none;
-            margin-left: 35%;
-            margin-top: 25%;
-        }
-    </style>
+    <title>Momento Game Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/app.css"></link>
 </head>
 <body>
-<div class="flex-container">
-    <div class="left-chat-side-bar">
-        <label for="name">Name: </label><input id="name" type="text"/>
-        <pre id="output"></pre>
-        <div id="messageBar">
-            <input id="input" type="text"/>
-            <button onclick="send()">Send</button>
-        </div>
-    </div>
-    <div class="main-game-screen-right">
-        <div class="flex-container">
-            <div class="board-screen-left">
-                <h1>Smash the acorn</h1>
-                <button id="game-btn" onclick="registerBtnHit()">
-                    <img width="200px" src="https://pngimg.com/uploads/acorn/acorn_PNG37003.png"/>
-                </button>
+    <div class="page-container">
+        <div class="flex-container reverse">
+            <div class="left-chat-side-bar">
+                <div>
+                    <div id="name-input">
+                        Welcome: <span id="name"></span>
+                        <!-- <label for="name">Name: </label><input id="name" type="text"/> -->
+                    </div>
+                    <div id="chat-messages"></div>
+                </div>
+                <div id="messageBar">
+                    <input id="input" type="text"/>
+                    <button onclick="send()">Send</button>
+                </div>
             </div>
-            <div id="score-board" class="board-screen-right"></div>
+            <div class="main-game-screen-right">
+                <div class="flex-container">
+                    <div class="board-screen-left center">
+                        <h1>Smash the acorn</h1>
+                        <button id="game-btn" onclick="registerBtnHit()">
+                            <img width="200px" src="https://pngimg.com/uploads/acorn/acorn_PNG37003.png"/>
+                        </button>
+                    </div>
+                    <div id="score-board" class="board-screen-right"></div>
+                </div>
+        
+            </div>
         </div>
-
     </div>
-</div>
-
-
 </body>
 
-<script>
-    const name = document.getElementById("name")
-    const input = document.getElementById("input");
-    const output = document.getElementById("output");
-    const scoreBoard = document.getElementById("score-board");
-    let connectHost = location.hostname + ":" + location.port;
-    const socket = new WebSocket(`ws://${connectHost}/connect`);
-
-    socket.onopen = function () {
-        output.innerHTML += "Status: Connected\n";
-    };
-
-    socket.onmessage = function (e) {
-        output.innerHTML += e.data + "\n";
-    };
-
-    input.addEventListener('keypress', e => {if (e.key === 'Enter') send()})
-    function send() {
-        if(input.value === ""){
-            return
-        }
-        fetch("/send-message", {
-            method: "post",
-            //make sure to serialize your JSON body
-            body: JSON.stringify({
-                Value: input.value,
-                User: name.value,
-            })
-        })
-        input.value = ""
-    }
-    function registerBtnHit(){
-        fetch("/register-hit", {
-            method: "post",
-            body: JSON.stringify({
-                user: name.value,
-            })
-        })
-    }
-
-    setInterval(()=> {
-        fetch("/top-scorers").then(async (resp) => {
-            let scoreBoardContent = ""
-            let scores = await resp.json()
-            scores.elements.forEach((v) => {
-                scoreBoardContent += `<h3>${v.name}: ${v.value}</h3>`;
-            })
-            scoreBoard.innerHTML = scoreBoardContent
-        })
-    }, 1000)
-
-</script>
+<script src="/static/app.js"></script>
 </html>
