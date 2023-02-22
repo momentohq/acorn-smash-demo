@@ -6,9 +6,9 @@ let socket = null;
   
 
 function MessageAdd(message) {
-	var chat_messages = document.getElementById("chat-messages");
+    let chat_messages = document.getElementById("chat-messages");
 
-	chat_messages.insertAdjacentHTML("beforeend", message);
+    chat_messages.insertAdjacentHTML("beforeend", message);
 	chat_messages.scrollTop = chat_messages.scrollHeight;
 }
 

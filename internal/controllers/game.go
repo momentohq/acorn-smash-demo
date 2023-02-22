@@ -7,13 +7,12 @@ import (
 
 	serviceconfig "github.com/eaddingtonwhite/momento-game-demo/internal/config"
 
-	"github.com/momentohq/client-sdk-go/incubating"
 	"github.com/momentohq/client-sdk-go/momento"
 	"github.com/momentohq/client-sdk-go/utils"
 )
 
 type GameController struct {
-	MomentoClient incubating.ScsClient
+	MomentoClient momento.SimpleCacheClient
 }
 
 type buttonHitRequest struct {
@@ -33,10 +32,10 @@ func (c *GameController) RegisterHit(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		writeFatalError(w, "fatal error occurred decoding msg payload", err)
 	}
-	_, err := c.MomentoClient.SortedSetIncrement(r.Context(), &incubating.SortedSetIncrementRequest{
+	_, err := c.MomentoClient.SortedSetIncrementScore(r.Context(), &momento.SortedSetIncrementScoreRequest{
 		CacheName:   serviceconfig.CacheName,
 		SetName:     "score-board",
-		ElementName: &momento.StringBytes{Text: request.User},
+		ElementName: momento.String(request.User),
 		Amount:      1,
 		CollectionTTL: utils.CollectionTTL{
 			Ttl:        24 * time.Hour,
@@ -49,21 +48,21 @@ func (c *GameController) RegisterHit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *GameController) GetTopScorers(w http.ResponseWriter, r *http.Request) {
-	resp, err := c.MomentoClient.SortedSetFetch(r.Context(), &incubating.SortedSetFetchRequest{
+	resp, err := c.MomentoClient.SortedSetFetch(r.Context(), &momento.SortedSetFetchRequest{
 		CacheName:       serviceconfig.CacheName,
 		SetName:         "score-board",
-		Order:           incubating.DESCENDING,
-		NumberOfResults: incubating.FetchLimitedElements{Limit: 10},
+		Order:           momento.DESCENDING,
+		NumberOfResults: momento.FetchLimitedElements{Limit: 10},
 	})
 	if err != nil {
 		writeFatalError(w, "fatal error occurred incrementing user score", err)
 	}
 	var scoreBoardEntries []scoreBoardEntry
 	switch r := resp.(type) {
-	case *incubating.SortedSetFetchHit:
+	case *momento.SortedSetFetchHit:
 		for _, e := range r.Elements {
 			scoreBoardEntries = append(scoreBoardEntries, scoreBoardEntry{
-				Name:  string(e.Name),
+				Name:  string(e.Value),
 				Value: e.Score,
 			})
 		}
