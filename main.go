@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/eaddingtonwhite/momento-game-demo/internal/controllers"
+	"github.com/momentohq/acorn-smash-demo/internal/controllers"
 
 	"github.com/momentohq/client-sdk-go/auth"
 	"github.com/momentohq/client-sdk-go/config"

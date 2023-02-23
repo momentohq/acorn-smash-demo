@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	serviceconfig "github.com/eaddingtonwhite/momento-game-demo/internal/config"
+	serviceconfig "github.com/momentohq/acorn-smash-demo/internal/config"
 
 	"github.com/momentohq/client-sdk-go/momento"
 	"github.com/momentohq/client-sdk-go/utils"

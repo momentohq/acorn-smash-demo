@@ -1,4 +1,4 @@
-module github.com/eaddingtonwhite/momento-game-demo
+module github.com/momentohq/acorn-smash-demo
 
 go 1.19
 
