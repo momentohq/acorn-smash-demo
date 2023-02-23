@@ -1,3 +1,3 @@
 package serviceconfig
 
-const CacheName = "default"
+const CacheName = "default-cache"

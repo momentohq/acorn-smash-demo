@@ -55,7 +55,7 @@ func (c *GameController) GetTopScorers(w http.ResponseWriter, r *http.Request) {
 		NumberOfResults: momento.FetchLimitedElements{Limit: 10},
 	})
 	if err != nil {
-		writeFatalError(w, "fatal error occurred incrementing user score", err)
+		writeFatalError(w, "fatal error occurred getting top scores", err)
 	}
 	var scoreBoardEntries []scoreBoardEntry
 	switch r := resp.(type) {
