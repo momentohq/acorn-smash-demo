@@ -8,11 +8,12 @@ import (
 	serviceconfig "github.com/momentohq/acorn-smash-demo/internal/config"
 
 	"github.com/momentohq/client-sdk-go/momento"
+	"github.com/momentohq/client-sdk-go/responses"
 	"github.com/momentohq/client-sdk-go/utils"
 )
 
 type GameController struct {
-	MomentoClient momento.SimpleCacheClient
+	MomentoClient momento.CacheClient
 }
 
 type buttonHitRequest struct {
@@ -33,11 +34,11 @@ func (c *GameController) RegisterHit(w http.ResponseWriter, r *http.Request) {
 		writeFatalError(w, "fatal error occurred decoding msg payload", err)
 	}
 	_, err := c.MomentoClient.SortedSetIncrementScore(r.Context(), &momento.SortedSetIncrementScoreRequest{
-		CacheName:   serviceconfig.CacheName,
-		SetName:     "score-board",
-		ElementName: momento.String(request.User),
-		Amount:      1,
-		CollectionTTL: utils.CollectionTTL{
+		CacheName: serviceconfig.CacheName,
+		SetName:   "score-board",
+		Value:     momento.String(request.User),
+		Amount:    1,
+		Ttl: &utils.CollectionTtl{
 			Ttl:        24 * time.Hour,
 			RefreshTtl: true,
 		},
@@ -48,21 +49,22 @@ func (c *GameController) RegisterHit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *GameController) GetTopScorers(w http.ResponseWriter, r *http.Request) {
-	resp, err := c.MomentoClient.SortedSetFetch(r.Context(), &momento.SortedSetFetchRequest{
-		CacheName:       serviceconfig.CacheName,
-		SetName:         "score-board",
-		Order:           momento.DESCENDING,
-		NumberOfResults: momento.FetchLimitedElements{Limit: 10},
+	var count uint32 = 10
+	resp, err := c.MomentoClient.SortedSetFetchByScore(r.Context(), &momento.SortedSetFetchByScoreRequest{
+		CacheName: serviceconfig.CacheName,
+		SetName:   "score-board",
+		Order:     momento.DESCENDING,
+		Count:     &count,
 	})
 	if err != nil {
 		writeFatalError(w, "fatal error occurred getting top scores", err)
 	}
 	var scoreBoardEntries []scoreBoardEntry
 	switch r := resp.(type) {
-	case *momento.SortedSetFetchHit:
-		for _, e := range r.Elements {
+	case *responses.SortedSetFetchHit:
+		for _, e := range r.ValueStringElements() {
 			scoreBoardEntries = append(scoreBoardEntries, scoreBoardEntry{
-				Name:  string(e.Value),
+				Name:  e.Value,
 				Value: e.Score,
 			})
 		}

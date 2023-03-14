@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gorilla/websocket v1.5.0
-	github.com/momentohq/client-sdk-go v0.10.0
+	github.com/momentohq/client-sdk-go v1.0.0
 )
 
 require (
