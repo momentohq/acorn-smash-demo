@@ -1,10 +1,9 @@
 package main
 
 import (
+	"github.com/momentohq/acorn-smash-demo/internal/controllers"
 	"net/http"
 	"time"
-
-	"github.com/momentohq/acorn-smash-demo/internal/controllers"
 
 	"github.com/momentohq/client-sdk-go/auth"
 	"github.com/momentohq/client-sdk-go/config"
@@ -16,20 +15,24 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	client, err := momento.NewSimpleCacheClient(&momento.SimpleCacheClientProps{
-		Configuration:      config.LatestLaptopConfig(),
-		CredentialProvider: credProvider,
-		DefaultTTL:         60 * time.Second,
-	})
+	topicClient, err := momento.NewTopicClient(
+		config.LaptopLatest(),
+		credProvider,
+	)
 	if err != nil {
 		panic(err)
 	}
 	chatController := &controllers.ChatController{
-		MomentoClient: client,
+		MomentoTopicClient: topicClient,
 	}
 
+	cacheClient, err := momento.NewCacheClient(
+		config.LaptopLatest(),
+		credProvider,
+		60*time.Second,
+	)
 	gameController := &controllers.GameController{
-		MomentoClient: client,
+		MomentoClient: cacheClient,
 	}
 
 	http.HandleFunc("/connect", chatController.Connect)
