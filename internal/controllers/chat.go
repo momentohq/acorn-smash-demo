@@ -22,7 +22,7 @@ type message struct {
 }
 
 type ChatController struct {
-	MomentoClient momento.SimpleCacheClient
+	MomentoTopicClient momento.TopicClient
 }
 
 const (
@@ -36,7 +36,7 @@ func (c *ChatController) Connect(w http.ResponseWriter, r *http.Request) {
 		writeFatalError(w, "fatal error occurred upgrading client connection to websocket", err)
 	}
 	// Instantiate subscriber
-	sub, err := c.MomentoClient.TopicSubscribe(r.Context(), &momento.TopicSubscribeRequest{
+	sub, err := c.MomentoTopicClient.Subscribe(r.Context(), &momento.TopicSubscribeRequest{
 		CacheName: serviceconfig.CacheName,
 		TopicName: chatRoomName,
 	})
@@ -49,9 +49,9 @@ func (c *ChatController) Connect(w http.ResponseWriter, r *http.Request) {
 			writeFatalError(w, "fatal error occurred reading from stream", err)
 		}
 		switch msg := item.(type) {
-		case *momento.TopicValueString:
+		case momento.String:
 			// Write message back to browser
-			if err = conn.WriteMessage(websocket.TextMessage, []byte(msg.Text)); err != nil {
+			if err = conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
 				writeFatalError(w, "fatal error occurred writing to client websocket", err)
 				return
 			}
@@ -65,12 +65,12 @@ func (c *ChatController) SendMessage(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
 		writeFatalError(w, "fatal error occurred decoding msg payload", err)
 	}
-	_, err := c.MomentoClient.TopicPublish(r.Context(), &momento.TopicPublishRequest{
+	_, err := c.MomentoTopicClient.Publish(r.Context(), &momento.TopicPublishRequest{
 		CacheName: serviceconfig.CacheName,
 		TopicName: chatRoomName,
-		Value: &momento.TopicValueString{
-			Text: fmt.Sprintf("%s: %s", t.User, t.Value),
-		},
+		Value: momento.String(
+			fmt.Sprintf("%s: %s", t.User, t.Value),
+		),
 	})
 	if err != nil {
 		writeFatalError(w, "fatal error occurred writing to topic", err)
